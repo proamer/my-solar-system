@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars, useTexture } from '@react-three/drei';
+import React, { useRef, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { CameraControls, Stars, useTexture } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
+import { useStore } from '../store';
 import Planet from './Planet';
 import { planetsData } from '../data/planets';
 
@@ -45,6 +46,58 @@ function Sun({ onSelect }) {
   );
 }
 
+function SceneController() {
+  const cameraControlsRef = useRef();
+  const focusedPlanetId = useStore(state => state.focusedPlanetId);
+
+  useEffect(() => {
+    if (!cameraControlsRef.current || !focusedPlanetId) return;
+    
+    // Initial zoom-in animation when a planet is clicked
+    if (focusedPlanetId === 'sun') {
+      cameraControlsRef.current.setLookAt(0, 10, 25, 0, 0, 0, true);
+      return;
+    }
+    
+    const planet = planetsData.find(p => p.id === focusedPlanetId);
+    if (planet) {
+      const simulationDate = useStore.getState().simulationDate;
+      const J2000 = new Date('2000-01-01T12:00:00Z').getTime();
+      const elapsedDays = (simulationDate.getTime() - J2000) / (1000 * 60 * 60 * 24);
+      const angle = elapsedDays * planet.speed;
+      const px = Math.cos(angle) * planet.distance;
+      const pz = Math.sin(angle) * planet.distance;
+      
+      // Calculate a good offset based on planet radius
+      const offset = planet.radius * 5;
+      cameraControlsRef.current.setLookAt(px + offset, offset, pz + offset, px, 0, pz, true);
+    }
+  }, [focusedPlanetId]);
+
+  useFrame((state, delta) => {
+    // Advance simulation time
+    useStore.getState().advanceTime(delta * 1000);
+    
+    // Continuously pan target for focused planet
+    if (focusedPlanetId && cameraControlsRef.current && focusedPlanetId !== 'sun') {
+      const planet = planetsData.find(p => p.id === focusedPlanetId);
+      if (planet) {
+        const simulationDate = useStore.getState().simulationDate;
+        const J2000 = new Date('2000-01-01T12:00:00Z').getTime();
+        const elapsedDays = (simulationDate.getTime() - J2000) / (1000 * 60 * 60 * 24);
+        const angle = elapsedDays * planet.speed;
+        const px = Math.cos(angle) * planet.distance;
+        const pz = Math.sin(angle) * planet.distance;
+        
+        // Slowly update target without interrupting rotation controls (animation false)
+        cameraControlsRef.current.setTarget(px, 0, pz, false);
+      }
+    }
+  });
+
+  return <CameraControls ref={cameraControlsRef} maxDistance={200} minDistance={1} />;
+}
+
 export default function SolarSystem({ onPlanetSelect }) {
   return (
     <Canvas camera={{ position: [0, 40, 80], fov: 45 }}>
@@ -75,14 +128,8 @@ export default function SolarSystem({ onPlanetSelect }) {
         />
       ))}
 
-      {/* Interaction Controls */}
-      <OrbitControls 
-        enablePan={true} 
-        enableZoom={true} 
-        enableRotate={true}
-        maxDistance={150}
-        minDistance={5}
-      />
+      {/* Interaction Controls with Logic */}
+      <SceneController />
 
       {/* Postprocessing for the Sun's glow */}
       <EffectComposer disableNormalPass>

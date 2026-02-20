@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Line, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import { useStore } from '../store';
 
 export default function Planet({ planet, onSelect }) {
   const meshRef = useRef();
@@ -15,6 +16,8 @@ export default function Planet({ planet, onSelect }) {
   // Load ring texture if needed
   const ringTexture = planet.hasRings && planet.ringTexture ? useTexture(planet.ringTexture) : null;
 
+  const setFocusedPlanetId = useStore(state => state.setFocusedPlanetId);
+
   // Generate orbit path points
   const points = [];
   const segments = 128;
@@ -23,10 +26,16 @@ export default function Planet({ planet, onSelect }) {
     points.push(new THREE.Vector3(Math.cos(theta) * planet.distance, 0, Math.sin(theta) * planet.distance));
   }
 
-  useFrame((state) => {
-    // Revolution around the sun (time based)
-    const time = state.clock.getElapsedTime();
-    const angle = time * planet.speed;
+  useFrame((state, delta) => {
+    // Fetch global time directly from store state avoiding reactivity overhead in useFrame
+    const simulationDate = useStore.getState().simulationDate;
+    
+    // Calculate how many days have passed since a reference epoch (e.g. 2000-01-01)
+    const J2000 = new Date('2000-01-01T12:00:00Z').getTime();
+    const elapsedDays = (simulationDate.getTime() - J2000) / (1000 * 60 * 60 * 24);
+    
+    // Calculate angle based on planet speed (radians per day)
+    const angle = elapsedDays * planet.speed;
     
     // Convert polar coordinates to cartesian for the group's position
     const x = Math.cos(angle) * planet.distance;
@@ -36,14 +45,14 @@ export default function Planet({ planet, onSelect }) {
       groupRef.current.position.set(x, 0, z);
     }
     
-    // Rotation on its own axis
     if (meshRef.current) {
-      meshRef.current.rotation.y += planet.rotationSpeed;
+      // Rotation on its own axis based on elapsed days
+      meshRef.current.rotation.y = elapsedDays * planet.rotationSpeed;
     }
     
     if (ringRef.current) {
-      // Rings rotate slightly with the planet or around it
-      ringRef.current.rotation.z += planet.rotationSpeed * 0.5;
+      // Rings rotate slightly
+      ringRef.current.rotation.z = elapsedDays * planet.rotationSpeed * 0.5;
     }
   });
 
@@ -65,6 +74,7 @@ export default function Planet({ planet, onSelect }) {
           onClick={(e) => {
             e.stopPropagation(); // Prevent clicks from passing through
             onSelect(planet);
+            setFocusedPlanetId(planet.id);
           }}
           onPointerOver={(e) => {
             e.stopPropagation();

@@ -8,7 +8,9 @@
   background-color: #050505;
 }
 
-body, html, #root {
+body,
+html,
+#root {
   margin: 0;
   padding: 0;
   width: 100vw;
@@ -23,7 +25,8 @@ body, html, #root {
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* Let clicks pass through to the 3D canvas */
+  pointer-events: none;
+  /* Let clicks pass through to the 3D canvas */
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -31,7 +34,7 @@ body, html, #root {
 
 .header {
   padding: 2rem;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
   pointer-events: auto;
 }
 
@@ -103,4 +106,104 @@ body, html, #root {
 .info-panel .stat-value {
   color: #fff;
   font-weight: 500;
+}
+
+/* Time Control Panel */
+.time-control-panel {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  background: rgba(15, 20, 30, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  pointer-events: auto;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  z-index: 20;
+}
+
+.time-control-panel .date-display {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.time-control-panel .controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.time-control-panel button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-control-panel button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.time-control-panel button.play-pause {
+  width: 44px;
+  height: 44px;
+  background: rgba(43, 130, 201, 0.3);
+  border-color: rgba(43, 130, 201, 0.5);
+}
+
+.time-control-panel button.play-pause:hover {
+  background: rgba(43, 130, 201, 0.5);
+}
+
+.time-control-panel .speed-display {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.time-control-panel .date-picker {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.time-control-panel .date-picker::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.back-btn {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
 import SolarSystem from './components/SolarSystem';
+import TimeControl from './components/TimeControl';
+import { useStore } from './store';
 
 function App() {
   const [selectedBody, setSelectedBody] = useState(null);
+  const setFocusedPlanetId = useStore(state => state.setFocusedPlanetId);
+
+  const handleResetFocus = () => {
+    setFocusedPlanetId(null);
+    setSelectedBody(null);
+    // You could also add a way to tell CameraControls to zoom out here, 
+    // but we can just let it stay where it is or add an effect in SolarSystem.jsx
+  };
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -46,9 +56,15 @@ function App() {
                   </div>
                 )}
               </div>
+              <button className="back-btn" onClick={handleResetFocus}>
+                Unfocus
+              </button>
             </>
           )}
         </div>
+        
+        {/* Time Control UI */}
+        <TimeControl />
       </div>
     </div>
   );
