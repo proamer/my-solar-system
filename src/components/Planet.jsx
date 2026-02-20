@@ -9,14 +9,20 @@ function Satellite({ satellite, onSelect, parentPlanet }) {
   const groupRef = useRef();
   const [hovered, setHover] = useState(false);
   const setFocusedPlanetId = useStore(state => state.setFocusedPlanetId);
+  const showOrbits = useStore(state => state.showOrbits);
+  const realisticScale = useStore(state => state.realisticScale);
 
   const texture = useTexture(satellite.texture);
+
+  // Apply scaling
+  const sRadius = realisticScale ? satellite.radius * 0.05 : satellite.radius;
+  const sDistance = realisticScale ? satellite.distance * 2 : satellite.distance;
 
   const points = [];
   const segments = 64;
   for (let i = 0; i <= segments; i++) {
     const theta = (i / segments) * Math.PI * 2;
-    points.push(new THREE.Vector3(Math.cos(theta) * satellite.distance, 0, Math.sin(theta) * satellite.distance));
+    points.push(new THREE.Vector3(Math.cos(theta) * sDistance, 0, Math.sin(theta) * sDistance));
   }
 
   useFrame(() => {
@@ -25,8 +31,8 @@ function Satellite({ satellite, onSelect, parentPlanet }) {
     const elapsedDays = (simulationDate.getTime() - J2000) / (1000 * 60 * 60 * 24);
     
     const angle = elapsedDays * satellite.speed;
-    const x = Math.cos(angle) * satellite.distance;
-    const z = Math.sin(angle) * satellite.distance;
+    const x = Math.cos(angle) * sDistance;
+    const z = Math.sin(angle) * sDistance;
     
     if (groupRef.current) {
       groupRef.current.position.set(x, 0, z);
@@ -38,13 +44,15 @@ function Satellite({ satellite, onSelect, parentPlanet }) {
 
   return (
     <>
-      <Line
-        points={points}
-        color="#777777"
-        lineWidth={0.5}
-        transparent
-        opacity={0.4}
-      />
+      {showOrbits && (
+        <Line
+          points={points}
+          color="#777777"
+          lineWidth={0.5}
+          transparent
+          opacity={0.4}
+        />
+      )}
       <group ref={groupRef}>
         <mesh 
           ref={meshRef}
@@ -64,7 +72,7 @@ function Satellite({ satellite, onSelect, parentPlanet }) {
             document.body.style.cursor = 'auto';
           }}
         >
-          <sphereGeometry args={[satellite.radius, 32, 32]} />
+          <sphereGeometry args={[sRadius, 32, 32]} />
           <meshStandardMaterial 
             map={texture} 
             color={satellite.color || '#ffffff'} 
@@ -92,13 +100,21 @@ export default function Planet({ planet, onSelect }) {
   const ringTexture = planet.hasRings && planet.ringTexture ? useTexture(planet.ringTexture) : null;
 
   const setFocusedPlanetId = useStore(state => state.setFocusedPlanetId);
+  const showOrbits = useStore(state => state.showOrbits);
+  const realisticScale = useStore(state => state.realisticScale);
+
+  // Apply scaling
+  const pRadius = realisticScale ? planet.radius * 0.05 : planet.radius;
+  const pDistance = realisticScale ? planet.distance * 2 : planet.distance;
+  const rInner = realisticScale ? planet.ringInnerRadius * 0.05 : planet.ringInnerRadius;
+  const rOuter = realisticScale ? planet.ringOuterRadius * 0.05 : planet.ringOuterRadius;
 
   // Generate orbit path points
   const points = [];
   const segments = 128;
   for (let i = 0; i <= segments; i++) {
     const theta = (i / segments) * Math.PI * 2;
-    points.push(new THREE.Vector3(Math.cos(theta) * planet.distance, 0, Math.sin(theta) * planet.distance));
+    points.push(new THREE.Vector3(Math.cos(theta) * pDistance, 0, Math.sin(theta) * pDistance));
   }
 
   useFrame((state, delta) => {
@@ -113,8 +129,8 @@ export default function Planet({ planet, onSelect }) {
     const angle = elapsedDays * planet.speed;
     
     // Convert polar coordinates to cartesian for the group's position
-    const x = Math.cos(angle) * planet.distance;
-    const z = Math.sin(angle) * planet.distance;
+    const x = Math.cos(angle) * pDistance;
+    const z = Math.sin(angle) * pDistance;
     
     if (groupRef.current) {
       groupRef.current.position.set(x, 0, z);
@@ -134,13 +150,15 @@ export default function Planet({ planet, onSelect }) {
   return (
     <>
       {/* Orbit Line */}
-      <Line
-        points={points}
-        color={hovered ? "#aaaaaa" : "#333333"}
-        lineWidth={1}
-        transparent
-        opacity={hovered ? 0.8 : 0.3}
-      />
+      {showOrbits && (
+        <Line
+          points={points}
+          color={hovered ? "#aaaaaa" : "#333333"}
+          lineWidth={1}
+          transparent
+          opacity={hovered ? 0.8 : 0.3}
+        />
+      )}
 
       {/* Planet Group (Positioned on the orbit) */}
       <group ref={groupRef}>
@@ -162,7 +180,7 @@ export default function Planet({ planet, onSelect }) {
             document.body.style.cursor = 'auto';
           }}
         >
-          <sphereGeometry args={[planet.radius, 64, 64]} />
+          <sphereGeometry args={[pRadius, 64, 64]} />
           <meshStandardMaterial 
             map={texture}
             roughness={0.7} 
@@ -175,7 +193,7 @@ export default function Planet({ planet, onSelect }) {
         {/* Planet Rings, if any */}
         {planet.hasRings && (
           <mesh ref={ringRef} rotation={[-Math.PI / 2 + 0.3, 0, 0]}>
-            <ringGeometry args={[planet.ringInnerRadius, planet.ringOuterRadius, 64]} />
+            <ringGeometry args={[rInner, rOuter, 64]} />
             <meshStandardMaterial 
               map={ringTexture}
               color={planet.ringColor} 

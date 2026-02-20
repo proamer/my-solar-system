@@ -11,10 +11,29 @@ export const useStore = create((set) => ({
   timeSpeed: 1,
   focusedPlanetId: null,
 
+  // Feature Toggles
+  showAsteroids: true,
+  showSpacecrafts: true,
+  showOrbits: true,
+  flightMode: false,
+  realisticScale: false,
+  showConstellations: false,
+  showDwarfs: true,
+
   setSimulationDate: (date) => set({ simulationDate: date }),
   togglePlaying: () => set((state) => ({ isPlaying: !state.isPlaying })),
   setTimeSpeed: (speed) => set({ timeSpeed: speed }),
   setFocusedPlanetId: (id) => set({ focusedPlanetId: id }),
+  
+  // Toggle Setters
+  setShowAsteroids: (val) => set({ showAsteroids: val }),
+  setShowSpacecrafts: (val) => set({ showSpacecrafts: val }),
+  setShowOrbits: (val) => set({ showOrbits: val }),
+  setFlightMode: (val) => set({ flightMode: val }),
+  setRealisticScale: (val) => set({ realisticScale: val }),
+  setShowConstellations: (val) => set({ showConstellations: val }),
+  setShowDwarfs: (val) => set({ showDwarfs: val }),
+
   advanceTime: (deltaMs) => set((state) => {
     if (!state.isPlaying) return state;
     return {

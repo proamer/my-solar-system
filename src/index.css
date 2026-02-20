@@ -111,21 +111,72 @@ html,
 /* Time Control Panel */
 .time-control-panel {
   position: absolute;
-  top: 2rem;
-  right: 2rem;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
   background: rgba(15, 20, 30, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
   pointer-events: auto;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 0.8rem;
+  gap: 1.5rem;
   z-index: 20;
+  width: max-content;
+  max-width: 95vw;
+  flex-wrap: wrap;
+  justify-content: center;
+  transition: all 0.3s ease;
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.time-control-panel.hidden {
+  transform: translateX(-50%) translateY(120%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.time-control-toggle {
+  position: absolute;
+  bottom: 2rem;
+  left: calc(50% + 1rem);
+  /* default center if panel is not there, or shift slightly */
+  transform: translateX(-50%);
+  background: rgba(15, 20, 30, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 21;
+  pointer-events: auto;
+}
+
+.time-control-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-50%) scale(1.1);
+}
+
+.time-control-toggle.open {
+  bottom: 6rem;
+  /* move up when open so it's above the panel */
+  width: 40px;
+  height: 40px;
+  background: rgba(15, 20, 30, 0.4);
 }
 
 .time-control-panel .date-display {
@@ -206,4 +257,136 @@ html,
 
 .back-btn:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Settings Panel */
+.settings-panel {
+  position: absolute;
+  top: 9rem;
+  left: 2rem;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.settings-toggle {
+  background: rgba(15, 20, 30, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.settings-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.settings-content {
+  margin-top: 1rem;
+  background: rgba(15, 20, 30, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 280px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.settings-content h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.setting-group {
+  margin-bottom: 1.2rem;
+}
+
+.setting-group h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.setting-group label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.setting-group input[type="checkbox"] {
+  margin-right: 0.6rem;
+  cursor: pointer;
+}
+
+.setting-group label.warning {
+  color: #ffaaaa;
+  font-size: 0.8rem;
+}
+
+.setting-group label.flight-mode {
+  color: #88cfff;
+}
+
+.setting-group .hint {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0 0 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .info-panel {
+    bottom: 6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100vw - 2rem);
+  }
+
+  .info-panel.hidden {
+    transform: translate(-50%, 20px);
+  }
+
+  .time-control-panel {
+    bottom: 1rem;
+    padding: 0.8rem 1rem;
+    gap: 0.8rem;
+    border-radius: 20px;
+    width: calc(100vw - 2rem);
+    justify-content: space-between;
+  }
+
+  .time-control-toggle {
+    bottom: 1rem;
+  }
+
+  .time-control-toggle.open {
+    bottom: 5rem;
+  }
+
+  .time-control-panel .speed-display {
+    display: none;
+    /* Hide speed text to save space, relies on buttons */
+  }
+
+  .time-control-panel .date-picker {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
 }

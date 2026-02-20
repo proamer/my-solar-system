@@ -143,5 +143,47 @@ export const planetsData = [
     satellites: [
       { id: 'triton', name: 'Triton', radius: 0.2, distance: 3.0, speed: -0.2, rotationSpeed: 0.1, color: '#a3bccc', texture: '/textures/moon.jpg', type: 'Satellite', discoverer: 'William Lassell', discoveryDate: '1846', description: 'The largest natural satellite of the planet Neptune, and the first Neptunian moon to be discovered. It is the only large moon in the Solar System with a retrograde orbit.' }
     ]
+  },
+  {
+    id: 'ceres',
+    name: 'Ceres',
+    radius: 0.15,
+    distance: 19,
+    speed: 0.005,
+    rotationSpeed: 0.1,
+    color: '#999999',
+    texture: '/textures/moon.jpg',
+    description: 'Ceres is the largest object in the asteroid belt between Mars and Jupiter and the only dwarf planet located in the inner solar system.',
+    moons: 0,
+    type: 'Dwarf Planet'
+  },
+  {
+    id: 'pluto',
+    name: 'Pluto',
+    radius: 0.18,
+    distance: 60,
+    speed: 0.00008,
+    rotationSpeed: 0.015,
+    color: '#ddc4a9',
+    texture: '/textures/moon.jpg', // Using generic moon texture
+    description: 'Pluto is a dwarf planet in the Kuiper belt, a ring of bodies beyond the orbit of Neptune. It was the first Kuiper belt object to be discovered.',
+    moons: 5,
+    type: 'Dwarf Planet',
+    satellites: [
+      { id: 'charon', name: 'Charon', radius: 0.09, distance: 1.5, speed: 0.2, rotationSpeed: 0.2, color: '#cccccc', texture: '/textures/moon.jpg', type: 'Satellite', discoverer: 'James Christy', discoveryDate: '1978', description: 'The largest of the five known natural satellites of the dwarf planet Pluto.' }
+    ]
+  },
+  {
+    id: 'eris',
+    name: 'Eris',
+    radius: 0.17,
+    distance: 72,
+    speed: 0.00005,
+    rotationSpeed: 0.01,
+    color: '#e0e0e0',
+    texture: '/textures/moon.jpg',
+    description: 'Eris is the most massive and second-largest known dwarf planet in the Solar System. It is a trans-Neptunian object in the scattered disc.',
+    moons: 1,
+    type: 'Dwarf Planet'
   }
 ];

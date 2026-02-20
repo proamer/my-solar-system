@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SolarSystem from './components/SolarSystem';
 import TimeControl from './components/TimeControl';
+import SettingsPanel from './components/SettingsPanel';
 import { useStore } from './store';
 
 function App() {
@@ -77,6 +78,9 @@ function App() {
         
         {/* Time Control UI */}
         <TimeControl />
+        
+        {/* Settings Panel */}
+        <SettingsPanel />
       </div>
     </div>
   );

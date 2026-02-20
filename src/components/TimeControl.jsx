@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../store';
-import { Play, Pause, FastForward, Rewind } from 'lucide-react';
+import { Play, Pause, FastForward, Rewind, Clock } from 'lucide-react';
 
 export default function TimeControl() {
   const { simulationDate, isPlaying, timeSpeed, togglePlaying, setTimeSpeed, setSimulationDate } = useStore();
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleDateChange = (e) => {
     setSimulationDate(new Date(e.target.value));
@@ -17,8 +18,13 @@ export default function TimeControl() {
   };
 
   return (
-    <div className="time-control-panel">
-      <div className="date-display">
+    <>
+      <button className={`time-control-toggle ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(!isOpen)}>
+        <Clock size={24} />
+      </button>
+
+      <div className={`time-control-panel ${isOpen ? '' : 'hidden'}`}>
+        <div className="date-display">
         {simulationDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
       </div>
       
@@ -46,6 +52,7 @@ export default function TimeControl() {
         onChange={handleDateChange}
         className="date-picker"
       />
-    </div>
+      </div>
+    </>
   );
 }

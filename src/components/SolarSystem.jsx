@@ -1,11 +1,15 @@
 import React, { useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { CameraControls, Stars, useTexture } from '@react-three/drei';
+import { CameraControls, FlyControls, Stars, useTexture } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { useStore } from '../store';
 import Planet from './Planet';
+import AsteroidBelt from './AsteroidBelt';
+import Spacecraft from './Spacecraft';
+import Constellations from './Constellations';
 import { planetsData } from '../data/planets';
+import { spacecraftsData } from '../data/spacecrafts';
 
 function Sun({ onSelect }) {
   const meshRef = useRef();
@@ -51,6 +55,7 @@ function SceneController() {
   const focusedPlanetId = useStore(state => state.focusedPlanetId);
 
   const getBodyData = (id) => {
+    // Check planets and dwarfs
     for (const p of planetsData) {
       if (p.id === id) return { type: 'planet', body: p };
       if (p.satellites) {
@@ -58,11 +63,15 @@ function SceneController() {
         if (sat) return { type: 'satellite', body: sat, parent: p };
       }
     }
+    // Check spacecrafts
+    const sc = spacecraftsData.find(s => s.id === id);
+    if (sc) return { type: 'spacecraft', body: sc };
+    
     return null;
   };
 
   const getBodyPosition = (bodyData, elapsedDays) => {
-    if (bodyData.type === 'planet') {
+    if (bodyData.type === 'planet' || bodyData.type === 'spacecraft') {
       const angle = elapsedDays * bodyData.body.speed;
       return {
         x: Math.cos(angle) * bodyData.body.distance,
@@ -127,10 +136,23 @@ function SceneController() {
     }
   });
 
-  return <CameraControls ref={cameraControlsRef} maxDistance={200} minDistance={1} />;
+  return (
+    <>
+      <CameraControls ref={cameraControlsRef} maxDistance={200} minDistance={1} />
+    </>
+  );
 }
 
 export default function SolarSystem({ onPlanetSelect }) {
+  const showAsteroids = useStore(state => state.showAsteroids);
+  const showSpacecrafts = useStore(state => state.showSpacecrafts);
+  const showDwarfs = useStore(state => state.showDwarfs);
+  const showConstellations = useStore(state => state.showConstellations);
+  const flightMode = useStore(state => state.flightMode);
+
+  // Filter planets based on dwarf setting
+  const visiblePlanets = planetsData.filter(p => showDwarfs || p.type !== 'Dwarf Planet');
+
   return (
     <Canvas camera={{ position: [0, 40, 80], fov: 45 }}>
       {/* Dark space background with stars */}
@@ -151,8 +173,18 @@ export default function SolarSystem({ onPlanetSelect }) {
       {/* Sun */}
       <Sun onSelect={onPlanetSelect} />
 
-      {/* Planets */}
-      {planetsData.map((planet) => (
+      {/* Asteroid Belts */}
+      {showAsteroids && (
+        <>
+          {/* Main Asteroid Belt (Between Mars and Jupiter) */}
+          <AsteroidBelt innerRadius={18} outerRadius={21} count={2000} color="#888888" />
+          {/* Kuiper Belt (Beyond Neptune) */}
+          <AsteroidBelt innerRadius={55} outerRadius={65} count={3000} color="#667788" />
+        </>
+      )}
+
+      {/* Planets and Dwarfs */}
+      {visiblePlanets.map((planet) => (
         <Planet 
           key={planet.id} 
           planet={planet} 
@@ -160,8 +192,21 @@ export default function SolarSystem({ onPlanetSelect }) {
         />
       ))}
 
+      {/* Spacecrafts */}
+      {showSpacecrafts && spacecraftsData.map((sc) => (
+        <Spacecraft 
+          key={sc.id} 
+          spacecraft={sc} 
+          onSelect={onPlanetSelect} 
+        />
+      ))}
+
+      {/* Constellations */}
+      {showConstellations && <Constellations />}
+
       {/* Interaction Controls with Logic */}
-      <SceneController />
+      {!flightMode && <SceneController />}
+      {flightMode && <FlyControls rollSpeed={0.5} movementSpeed={20} dragToLook={true} />}
 
       {/* Postprocessing for the Sun's glow */}
       <EffectComposer disableNormalPass>
