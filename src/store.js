@@ -7,8 +7,8 @@ export const useStore = create((set) => ({
   simulationDate: START_DATE,
   isPlaying: true,
   // speed: how many milliseconds of simulation pass per realtime millisecond
-  // Decreased to 1 real second = 1 simulation hour (3600000 ms) instead of 1 day
-  timeSpeed: 3600000, 
+  // Default: Realtime (1 real millisecond = 1 simulation millisecond)
+  timeSpeed: 1,
   focusedPlanetId: null,
 
   setSimulationDate: (date) => set({ simulationDate: date }),

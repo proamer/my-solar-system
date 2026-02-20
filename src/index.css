@@ -112,7 +112,7 @@ html,
 .time-control-panel {
   position: absolute;
   top: 2rem;
-  left: 2rem;
+  right: 2rem;
   background: rgba(15, 20, 30, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);

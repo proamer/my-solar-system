@@ -9,7 +9,12 @@ export default function TimeControl() {
     setSimulationDate(new Date(e.target.value));
   };
 
-  const speedMultiplier = timeSpeed / 86400000; // Relative to 1 day/sec
+  const getSpeedLabel = (speed) => {
+    if (speed === 1) return "Realtime";
+    if (speed < 1000) return `${speed.toFixed(1)}x Realtime`;
+    if (speed < 86400000) return `${(speed / 3600000).toFixed(1)} Hrs/Sec`;
+    return `${(speed / 86400000).toFixed(1)} Days/Sec`;
+  };
 
   return (
     <div className="time-control-panel">
@@ -32,7 +37,7 @@ export default function TimeControl() {
       </div>
       
       <div className="speed-display">
-        {speedMultiplier.toFixed(1)}x Speed (Days/Sec)
+        {getSpeedLabel(timeSpeed)}
       </div>
 
       <input 
