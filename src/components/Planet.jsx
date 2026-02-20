@@ -4,6 +4,81 @@ import { Line, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { useStore } from '../store';
 
+function Satellite({ satellite, onSelect, parentPlanet }) {
+  const meshRef = useRef();
+  const groupRef = useRef();
+  const [hovered, setHover] = useState(false);
+  const setFocusedPlanetId = useStore(state => state.setFocusedPlanetId);
+
+  const texture = useTexture(satellite.texture);
+
+  const points = [];
+  const segments = 64;
+  for (let i = 0; i <= segments; i++) {
+    const theta = (i / segments) * Math.PI * 2;
+    points.push(new THREE.Vector3(Math.cos(theta) * satellite.distance, 0, Math.sin(theta) * satellite.distance));
+  }
+
+  useFrame(() => {
+    const simulationDate = useStore.getState().simulationDate;
+    const J2000 = new Date('2000-01-01T12:00:00Z').getTime();
+    const elapsedDays = (simulationDate.getTime() - J2000) / (1000 * 60 * 60 * 24);
+    
+    const angle = elapsedDays * satellite.speed;
+    const x = Math.cos(angle) * satellite.distance;
+    const z = Math.sin(angle) * satellite.distance;
+    
+    if (groupRef.current) {
+      groupRef.current.position.set(x, 0, z);
+    }
+    if (meshRef.current) {
+      meshRef.current.rotation.y = elapsedDays * satellite.rotationSpeed;
+    }
+  });
+
+  return (
+    <>
+      <Line
+        points={points}
+        color="#777777"
+        lineWidth={0.5}
+        transparent
+        opacity={0.4}
+      />
+      <group ref={groupRef}>
+        <mesh 
+          ref={meshRef}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect({ ...satellite, parentId: parentPlanet?.id });
+            setFocusedPlanetId(satellite.id);
+          }}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            setHover(true);
+            document.body.style.cursor = 'pointer';
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            setHover(false);
+            document.body.style.cursor = 'auto';
+          }}
+        >
+          <sphereGeometry args={[satellite.radius, 32, 32]} />
+          <meshStandardMaterial 
+            map={texture} 
+            color={satellite.color || '#ffffff'} 
+            roughness={0.8} 
+            metalness={0.2} 
+            emissive="#ffffff"
+            emissiveIntensity={hovered ? 0.15 : 0}
+          />
+        </mesh>
+      </group>
+    </>
+  );
+}
+
 export default function Planet({ planet, onSelect }) {
   const meshRef = useRef();
   const groupRef = useRef();
@@ -111,6 +186,11 @@ export default function Planet({ planet, onSelect }) {
             />
           </mesh>
         )}
+
+        {/* Satellites */}
+        {planet.satellites && planet.satellites.map(sat => (
+          <Satellite key={sat.id} satellite={sat} onSelect={onSelect} parentPlanet={planet} />
+        ))}
       </group>
     </>
   );

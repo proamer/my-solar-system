@@ -50,6 +50,40 @@ function SceneController() {
   const cameraControlsRef = useRef();
   const focusedPlanetId = useStore(state => state.focusedPlanetId);
 
+  const getBodyData = (id) => {
+    for (const p of planetsData) {
+      if (p.id === id) return { type: 'planet', body: p };
+      if (p.satellites) {
+        const sat = p.satellites.find(s => s.id === id);
+        if (sat) return { type: 'satellite', body: sat, parent: p };
+      }
+    }
+    return null;
+  };
+
+  const getBodyPosition = (bodyData, elapsedDays) => {
+    if (bodyData.type === 'planet') {
+      const angle = elapsedDays * bodyData.body.speed;
+      return {
+        x: Math.cos(angle) * bodyData.body.distance,
+        z: Math.sin(angle) * bodyData.body.distance
+      };
+    } else {
+      const pAngle = elapsedDays * bodyData.parent.speed;
+      const px = Math.cos(pAngle) * bodyData.parent.distance;
+      const pz = Math.sin(pAngle) * bodyData.parent.distance;
+      
+      const sAngle = elapsedDays * bodyData.body.speed;
+      const sx = Math.cos(sAngle) * bodyData.body.distance;
+      const sz = Math.sin(sAngle) * bodyData.body.distance;
+      
+      return {
+        x: px + sx,
+        z: pz + sz
+      };
+    }
+  };
+
   useEffect(() => {
     if (!cameraControlsRef.current || !focusedPlanetId) return;
     
@@ -59,18 +93,17 @@ function SceneController() {
       return;
     }
     
-    const planet = planetsData.find(p => p.id === focusedPlanetId);
-    if (planet) {
+    const bodyData = getBodyData(focusedPlanetId);
+    if (bodyData) {
       const simulationDate = useStore.getState().simulationDate;
       const J2000 = new Date('2000-01-01T12:00:00Z').getTime();
       const elapsedDays = (simulationDate.getTime() - J2000) / (1000 * 60 * 60 * 24);
-      const angle = elapsedDays * planet.speed;
-      const px = Math.cos(angle) * planet.distance;
-      const pz = Math.sin(angle) * planet.distance;
+      
+      const { x, z } = getBodyPosition(bodyData, elapsedDays);
       
       // Calculate a good offset based on planet radius
-      const offset = planet.radius * 5;
-      cameraControlsRef.current.setLookAt(px + offset, offset, pz + offset, px, 0, pz, true);
+      const offset = bodyData.body.radius * 5;
+      cameraControlsRef.current.setLookAt(x + offset, offset, z + offset, x, 0, z, true);
     }
   }, [focusedPlanetId]);
 
@@ -80,17 +113,16 @@ function SceneController() {
     
     // Continuously pan target for focused planet
     if (focusedPlanetId && cameraControlsRef.current && focusedPlanetId !== 'sun') {
-      const planet = planetsData.find(p => p.id === focusedPlanetId);
-      if (planet) {
+      const bodyData = getBodyData(focusedPlanetId);
+      if (bodyData) {
         const simulationDate = useStore.getState().simulationDate;
         const J2000 = new Date('2000-01-01T12:00:00Z').getTime();
         const elapsedDays = (simulationDate.getTime() - J2000) / (1000 * 60 * 60 * 24);
-        const angle = elapsedDays * planet.speed;
-        const px = Math.cos(angle) * planet.distance;
-        const pz = Math.sin(angle) * planet.distance;
+        
+        const { x, z } = getBodyPosition(bodyData, elapsedDays);
         
         // Slowly update target without interrupting rotation controls (animation false)
-        cameraControlsRef.current.setTarget(px, 0, pz, false);
+        cameraControlsRef.current.setTarget(x, 0, z, false);
       }
     }
   });

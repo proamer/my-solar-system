@@ -49,6 +49,18 @@ function App() {
                     <span className="stat-value">{selectedBody.radius}x</span>
                   </div>
                 )}
+                {selectedBody.discoverer !== undefined && (
+                  <div className="stat">
+                    <span>Discoverer</span>
+                    <span className="stat-value">{selectedBody.discoverer}</span>
+                  </div>
+                )}
+                {selectedBody.discoveryDate !== undefined && (
+                  <div className="stat">
+                    <span>Discovery Date</span>
+                    <span className="stat-value">{selectedBody.discoveryDate}</span>
+                  </div>
+                )}
                 {selectedBody.moons !== undefined && (
                   <div className="stat">
                     <span>Moons</span>
