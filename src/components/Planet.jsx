@@ -90,11 +90,10 @@ export default function Planet({ planet, onSelect }) {
           <sphereGeometry args={[planet.radius, 64, 64]} />
           <meshStandardMaterial 
             map={texture}
-            color={planet.color} 
             roughness={0.7} 
             metalness={0.2}
-            emissive={hovered ? planet.color : "#000000"}
-            emissiveIntensity={hovered ? 0.2 : 0}
+            emissive="#ffffff"
+            emissiveIntensity={hovered ? 0.15 : 0}
           />
         </mesh>
 
